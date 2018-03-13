@@ -1,12 +1,28 @@
+# class sample generator
+# usage: python sample.py <log_name.json> <config_name.json>
+# config example: 
+#   {
+#       "seed": -1,                 зерно для генератора ПСЧ 
+#       "try_num": 10000,           максимально количетсво попыток для создания класса
+#       "dimenision": 2,            количетсво критериев точек класса
+#       "amount": 5,                количество классов
+#       "radius_range": [20,30],    интервал допустимых радиусов классов
+#       "points_range": [40,50],    интревал допустимого количетсва точек классов
+#       "min_distanse": 61,         минимальное рассточние между центрами классов
+#       "max_distanse": 200,        максимальное расстоняие между центрами классов
+#       "max_length": 1000          макисимальная длина измерения поля
+#   }
+
 import random
 import math
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import json
 import sys
+import time
 
 class Sample:
-    
+    seed = None
     try_num = 0
     dimenision = 0
     amount = 0
@@ -28,7 +44,8 @@ class Sample:
                 min_distanse, #минимальное расстояние между центрами классов
                 max_length, #максимальная длина/ширина поля
                 max_distanse, #максимальное расстояние между центрами классов
-                points_range): #интервал допустимого числа точек в классе
+                points_range, #интервал допустимого числа точек в классе
+                seed): #зерно рандома
         self.try_num = try_num
         self.dimenision = dimenision
         self.radius_range = radius_range
@@ -36,6 +53,11 @@ class Sample:
         self.max_length = max_length
         self.max_distanse = max_distanse
         self.points_range = points_range
+        if (seed >=0 ):
+            self.seed = seed
+        else:
+            self.seed = time.time()
+        random.seed(self.seed)
         for i in range(self.dimenision):
             self.zero.append(0)
   
@@ -140,22 +162,23 @@ class Sample:
             
         plt.show()
     
-    def logClasses(self, out):
+    def logClasses(self):
         data = {}
+        data['seed'] = self.seed
         for i in range(len(self.classes)):
             data['class{}'.format(i)] = self.classes[i]
-        with open(out, 'w') as output:
+        with open(sys.argv[1], 'w') as output:
              json.dump(data, output)
 
 if __name__ == '__main__':
 
-    if (len(sys.argv)!=2): 
-        print ('use sample.py <config_name.json>')
+    if (len(sys.argv)!=3): 
+        print ('use sample.py <log_name.json> <config_name.json>')
         exit(1)
 
     data = 0
     
-    with open(sys.argv[1]) as config:
+    with open(sys.argv[2]) as config:
         data = json.load(config)
         config.close()
 
@@ -165,8 +188,9 @@ if __name__ == '__main__':
                     points_range = data['points_range'],
                     min_distanse = data['min_distanse'],
                     max_distanse = data['max_distanse'],
-                    max_length = data['max_length']) 
+                    max_length = data['max_length'],
+                    seed = data['seed']) 
     for i in range(data['amount']):
         sample.createClass()
-    sample.logClasses('log.json')
+    sample.logClasses()
     sample.showClasses()
