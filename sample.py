@@ -1,43 +1,52 @@
 import random
 import math
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import json
+import sys
 
 class Sample:
     
-    try_num = 0;
+    try_num = 0
     dimenision = 0
     amount = 0
     radius_range = [0,0]
     points_range = [0,0]
     max_intersection = 0
-    min_distance = 0
-    max_distance = 0
+    min_distanse = 0
+    max_length = 0
+    max_distanse = 0
     distribution_func = 0
     zero = []
     classes = []
     colors = ['bo', 'go', 'ro', 'co', 'mo', 'yo', 'ko', 'bs', 'gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'b^', 'g^', 'r^', 'c^', 'm^', 'y^', 'k^',]
     
-    def __init__(self):
-        self.try_num = 1000
-        self.dimenision = 2
-        self.amount = 2
-        self.radius_range = [10,50]
-        self.max_intersection = 10
-        self.min_distance = 200
-        self.max_distance = 1000
-        self.distribution_func = 0
-        self.points_range = [10,100]
+    def __init__(self,
+                try_num, #количество попыток создать класс
+                dimenision, #количество критериев
+                radius_range, #интервал допустимых радиусов классов
+                min_distanse, #минимальное расстояние между центрами классов
+                max_length, #максимальная длина/ширина поля
+                max_distanse, #максимальное расстояние между центрами классов
+                points_range): #интервал допустимого числа точек в классе
+        self.try_num = try_num
+        self.dimenision = dimenision
+        self.radius_range = radius_range
+        self.min_distanse = min_distanse
+        self.max_length = max_length
+        self.max_distanse = max_distanse
+        self.points_range = points_range
         for i in range(self.dimenision):
             self.zero.append(0)
   
     def getDistance(self, vector1, vector2):
-        distance = 0;
+        distanse = 0
         for i in range(len(vector1)):
-            distance += (vector1[i]-vector2[i])**2
-        distance = math.sqrt(distance)
-        return distance
+            distanse += (vector1[i]-vector2[i])**2
+        distanse = math.sqrt(distanse)
+        return distanse
 
-    def getRandomVector(self, rnd_min, rnd_max, zero_point):
+    def getRandomVector(self, rnd_max, zero_point):
         vector = []
         
         for i in range(self.dimenision):
@@ -54,7 +63,6 @@ class Sample:
         for i in range(self.dimenision):
             vector[i] = vector[i]/length
             vector[i] = vector[i]*random_length
-#            vector[i] = vector[i]+rnd_min
             vector[i] = vector[i] + zero_point[i]
             
         return vector
@@ -62,21 +70,26 @@ class Sample:
     def createClass(self):
         
         bad_class = True
-        
+
         center = []
         
         for i in range(self.try_num):
             
-            center = self.getRandomVector(self.min_distance, self.max_distance, self.zero)
+            center = self.getRandomVector(self.max_length, self.zero)
             
             if len(self.classes) == 0:
                 bad_class = False
                 break
                 
             good_class = True
-                
+
             for j in range(len(self.classes)):
-                if self.getDistance(center,self.classes[j][0]) < self.min_distance:
+                if self.getDistance(center,self.classes[j][0]) < self.min_distanse:
+                    good_class = False
+                    break
+
+            for j in range(len(self.classes)):
+                if self.getDistance(center,self.classes[j][0]) > self.max_distanse:
                     good_class = False
                     break
                 
@@ -87,7 +100,6 @@ class Sample:
         if(bad_class):
             print ('cant create new class')
             return
-        
         
         rnd_rad = random.random()
         rnd_rad *= (self.radius_range[1]-self.radius_range[0])
@@ -102,25 +114,59 @@ class Sample:
         
         new_class.append(center)
         for i in range(amount):
-            new_class.append(self.getRandomVector(0, rnd_rad, center))
+            new_class.append(self.getRandomVector(rnd_rad, center))
         
         self.classes.append(new_class)
-        
+
     def showClasses(self):
-        if self.dimenision != 2:
-            print ('plot only for 2d!')
+        if self.dimenision != 2 and self.dimenision != 3:
+            print ('plot only for 2d or 3d!')
             return
         
-        for i in range(len(self.classes)):
-            x = [el[0] for el in self.classes[i]]
-            y = [el[1] for el in self.classes[i]]
-            plt.plot(x,y,self.colors[i])
+        if self.dimenision == 2:
+            for i in range(len(self.classes)):
+                x = [el[0] for el in self.classes[i]]
+                y = [el[1] for el in self.classes[i]]
+                plt.plot(x,y,self.colors[i])
+        
+        if self.dimenision == 3:
+            fig = plt.figure()
+            ax = fig.add_subplot(111,projection='3d')
+            for i in range(len(self.classes)):
+                x = [el[0] for el in self.classes[i]]
+                y = [el[1] for el in self.classes[i]]
+                z = [el[2] for el in self.classes[i]]
+                ax.scatter(x,y,z,self.colors[i])
             
         plt.show()
-            
-        
     
-sample = Sample()
-for i in range(20):
-    sample.createClass()
-sample.showClasses()
+    def logClasses(self, out):
+        data = {}
+        for i in range(len(self.classes)):
+            data['class{}'.format(i)] = self.classes[i]
+        with open(out, 'w') as output:
+             json.dump(data, output)
+
+if __name__ == '__main__':
+
+    if (len(sys.argv)!=2): 
+        print ('use sample.py <config_name.json>')
+        exit(1)
+
+    data = 0
+    
+    with open(sys.argv[1]) as config:
+        data = json.load(config)
+        config.close()
+
+    sample = Sample(try_num = data['try_num'],
+                    dimenision = data['dimenision'],
+                    radius_range = data['radius_range'],
+                    points_range = data['points_range'],
+                    min_distanse = data['min_distanse'],
+                    max_distanse = data['max_distanse'],
+                    max_length = data['max_length']) 
+    for i in range(data['amount']):
+        sample.createClass()
+    sample.logClasses('log.json')
+    sample.showClasses()

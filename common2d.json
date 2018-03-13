@@ -1,6 +1,6 @@
 {
     "try_num": 10000,
-    "dimenision": 5,
+    "dimenision": 2,
     "amount": 5,
     "radius_range": [20,30],
     "points_range": [40,50],

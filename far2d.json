@@ -1,0 +1,10 @@
+{
+    "try_num": 10000,
+    "dimenision": 2,
+    "amount": 5,
+    "radius_range": [20,30],
+    "points_range": [40,50],
+    "min_distanse": 30000,
+    "max_distanse": 200000,
+    "max_length": 100000
+}
