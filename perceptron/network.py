@@ -1,8 +1,11 @@
 import math 
 import json
+import random
 
 def func(x):
-    return 1.0 / (1+math.exp(-x))
+    if x>10: return 1
+    elif x<-10: return 0
+    else: return 1.0 / (1+math.exp(-x))
 
 class Node:
     w = []
@@ -12,10 +15,12 @@ class Node:
     def __init__(self,
                 w,      #веса
                 func,   #функция активации
-                k):     #скорость обучения
+                k,
+                className):     #скорость обучения
         self.w = w
         self.func = func
         self.k = k
+        self.className = className
 
     def do(self, inpt):
         inputs = inpt[:]
@@ -29,21 +34,14 @@ class Node:
 
         return self.func(sum)
 
-    def teach(self, err):
+    def teach(self, inpt, wish):
+        res = self.do(inpt)
+        print ('{}: {}'.format(self.className,res))
+        inputs = inpt[:]
+        inputs.append(1)
         for i in range(len(self.w)):
-            self.w[i] += self.k*err
-
-def checkError(classification, trueClass, numberOfClasses):
-    step = 1.0 / numberOfClasses
-    trueClassRange = [step*trueClass, step*(trueClass+1)]
-    print ('node: {}, true: {}, dif: {}'.format(classification,(trueClassRange[0]+trueClassRange[1]) / 2.0,  -(classification - (trueClassRange[0]+trueClassRange[1]) / 2.0)))
-    return -(classification - (trueClassRange[0]+trueClassRange[1]) / 2.0)
-
-def checkClass(classification, trueClass, numberOfClasses):
-    step = 1.0 / numberOfClasses
-    trueClassRange = [step*trueClass, step*(trueClass+1)]
-    if classification > trueClassRange[0] and classification < trueClassRange[1]: return True
-    return False
+            print (self.k*(wish-res)*inputs[i])
+            self.w[i] = self.w[i] + self.k*(wish-res)*inputs[i]
 
 if __name__ == '__main__':
 
@@ -55,26 +53,34 @@ if __name__ == '__main__':
 
     classes = [data['class0'],data['class1']]
 
-    node1 = Node([0,0,0], func, 0.005)
+    node1 = Node([0,0,0], func, 0.005, 'first')
+    node2 = Node([0,0,0], func, 0.005, 'second')
 
-    for point in classes[0]:
-        node1.teach(checkError(node1.do(point),0,len(classes)))
-        print (node1.w)
+    print ('teaching...')
 
-    node2 = Node([0,0,0], func, 0.005)
+    for i in range (100):
+        for c in range(len(classes)):
+            point = random.choice(classes[c])
+            if(c == 0):
+                print ('class: {}'.format(c))
+                node1.teach(point,1)
+                node2.teach(point,0)
+            else:
+                print ('class: {}'.format(c))
+                node1.teach(point,0)
+                node2.teach(point,1)
 
-    for point in classes[1]:
-        node2.teach(checkError(node2.do(point),1,len(classes)))
-        print (node2.w)
-
+    print ('********')
+    print (node1.w)
+    print (node2.w)
+    print ('********')
 
     for c in range(len(classes)):
+        print ('this is {}:'.format(c+1))
         for point in classes[c]:
             res1 = node1.do(point)
             res2 = node2.do(point)
-            print ('res1: {}, res2: {}. c: {}'.format(res1,res2,c))
-            if (abs(res1-0.25) < abs(res2-0.75)) and c == 0: print(True) 
-            elif (abs(res1-0.25) >= abs(res2-0.75)) and c == 1: print(True)
-            else:
-                print(False) 
-    
+            print('res1: {}, res2: {}'.format(res1, res2))
+            if res1>res2: print (1)
+            else: print (2)
+            print ('---')
