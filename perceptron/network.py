@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 plt.ion()
 
+teach_amount = 50
 
 
 def func(x):
@@ -86,7 +87,7 @@ if __name__ == '__main__':
         print ('epoch: {}'.format(epoch))
         
         #эпоха
-        for i in range(30):
+        for i in range(teach_amount):
             for c in range(len(values)):
                 # print('class {}'.format(c))
                 point = values[c][i]
@@ -101,7 +102,7 @@ if __name__ == '__main__':
         #проверка
         err_num = 0
         for c in range (len(values)):
-            for point in values[c][30:]:
+            for point in values[c][teach_amount:]:
                 res = []
                 for node in nodes:
                     res.append(node.do(point))
@@ -110,6 +111,7 @@ if __name__ == '__main__':
 
         epochs.append(epoch)
         errors.append(err_num)
+        plt.clf()
         plt.plot(epochs,errors,'b')
         plt.draw()
         plt.pause(0.1)
@@ -130,8 +132,9 @@ if __name__ == '__main__':
         last = err_num
 
         #exit
-        if err_num / points_number < 0.05: break 
+        if err_num / points_number < 0.1: break 
         if last < err_num and epoch > 30: break
+        if epoch > 50: break
 
     #final
 

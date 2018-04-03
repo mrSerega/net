@@ -2,9 +2,9 @@
     "seed": -1,
     "try_num": 10000,
     "dimenision": 3,
-    "amount": 5,
+    "amount": 10,
     "radius_range": [20,30],
-    "points_range": [40,50],
+    "points_range": [90,100],
     "min_distanse": 61,
     "max_distanse": 200,
     "max_length": 1000
