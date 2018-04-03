@@ -1,6 +1,12 @@
 import math 
 import json
 import random
+import numpy as np
+import matplotlib.pyplot as plt
+
+plt.ion()
+
+
 
 def func(x):
     if x>10: return 1
@@ -8,6 +14,7 @@ def func(x):
     else: return 1.0 / (1+math.exp(-x))
 
 class Node:
+
     w = []
     func = None
     k = 1
@@ -21,6 +28,9 @@ class Node:
         self.func = func
         self.k = k
         self.className = className
+        self.iter = 0
+        self.it = []
+        self.val = []
 
     def do(self, inpt):
         inputs = inpt[:]
@@ -36,51 +46,110 @@ class Node:
 
     def teach(self, inpt, wish):
         res = self.do(inpt)
-        print ('{}: {}'.format(self.className,res))
         inputs = inpt[:]
-        inputs.append(1)
+        inputs.append(1)       
         for i in range(len(self.w)):
-            print (self.k*(wish-res)*inputs[i])
             self.w[i] = self.w[i] + self.k*(wish-res)*inputs[i]
 
-if __name__ == '__main__':
-
+if __name__ == '__main__':  
+    print ('---------new init-----------')
+    
     data = None
 
     with open('./../sample/sample.json') as sample:
         data = json.load(sample)
         sample.close
 
-    classes = [data['class0'],data['class1']]
+    classes = data['classes']
+    nodes = []
+    zeros = []
+    for i in range(data['dimenision']+1): zeros.append(0)
+    values = []
 
-    node1 = Node([0,0,0], func, 0.005, 'first')
-    node2 = Node([0,0,0], func, 0.005, 'second')
+    for c in classes:
+        values.append(data[c])
+        nodes.append(Node(zeros[:], func, 0.02, c)) #0.05 -- скорость обучения
 
-    print ('teaching...')
+    epochs = []
+    errors = []
 
-    for i in range (100):
-        for c in range(len(classes)):
-            point = random.choice(classes[c])
-            if(c == 0):
-                print ('class: {}'.format(c))
-                node1.teach(point,1)
-                node2.teach(point,0)
-            else:
-                print ('class: {}'.format(c))
-                node1.teach(point,0)
-                node2.teach(point,1)
+    epoch = 0
+    last = 1
 
-    print ('********')
-    print (node1.w)
-    print (node2.w)
-    print ('********')
+    mem = []
+    min_number = 1
 
-    for c in range(len(classes)):
-        print ('this is {}:'.format(c+1))
-        for point in classes[c]:
-            res1 = node1.do(point)
-            res2 = node2.do(point)
-            print('res1: {}, res2: {}'.format(res1, res2))
-            if res1>res2: print (1)
-            else: print (2)
-            print ('---')
+    for node in nodes: mem.append([])
+
+    while(True):
+        epoch +=1
+        print ('epoch: {}'.format(epoch))
+        
+        #эпоха
+        for i in range(30):
+            for c in range(len(values)):
+                # print('class {}'.format(c))
+                point = values[c][i]
+                for cc in range(len(values)):
+                    if cc!=c: 
+                        nodes[cc].teach(point,0)
+                        # print ('{}: {}'.format(nodes[cc].className,nodes[cc].w))
+                    else:
+                        nodes[c].teach(point,1)
+                        # print ('{}: {}'.format(nodes[cc].className,nodes[cc].w))
+
+        #проверка
+        err_num = 0
+        for c in range (len(values)):
+            for point in values[c][30:]:
+                res = []
+                for node in nodes:
+                    res.append(node.do(point))
+                answer = res.index(max(res))
+                if answer!= c: err_num+=1
+
+        epochs.append(epoch)
+        errors.append(err_num)
+        plt.plot(epochs,errors,'b')
+        plt.draw()
+        plt.pause(0.1)
+
+        #meta
+
+        points_number = 0
+        for c in range (len(values)): points_number+=len(values[c])
+        
+        if err_num / points_number < min_number:
+            print ('!!!!!')
+            min_number = err_num / points_number
+            for index in range(len(nodes)):
+                mem[index]=nodes[index].w[:]
+                print (nodes[index].w)
+
+        print ('errors: {}'.format(err_num))
+        last = err_num
+
+        #exit
+        if err_num / points_number < 0.05: break 
+        if last < err_num and epoch > 30: break
+
+    #final
+
+    for index in range(len(nodes)):
+        nodes[index].w=mem[index][:]
+        print(nodes[index].w)
+
+    err_num = 0
+    for c in range (len(values)):
+        print ('this is {}'.format(c))
+        for point in values[c]:
+            res = []
+            for node in nodes:
+                res.append(node.do(point))
+            answer = res.index(max(res))
+            print(answer)
+            if answer!= c: err_num+=1
+
+    print (err_num)
+    plt.draw()
+    plt.pause(0)

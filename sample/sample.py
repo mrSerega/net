@@ -164,9 +164,12 @@ class Sample:
     
     def logClasses(self):
         data = {}
-        data['seed'] = self.seed
+        data['dimenision'] = self.dimenision                #meta: размерность точек
+        data['seed'] = self.seed                            #mata: зерно ГПСЧ
+        data['classes'] = []                                #meat: перечень имен классов
         for i in range(len(self.classes)):
-            data['class{}'.format(i)] = self.classes[i]
+            data['class{}'.format(i)] = self.classes[i]     #добавляем класс в перечень
+            data['classes'].append('class{}'.format(i))     #meta: добавляем имя класса в перечень
         with open(sys.argv[1], 'w') as output:
              json.dump(data, output)
 
