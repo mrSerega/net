@@ -132,7 +132,7 @@ if __name__ == '__main__':
         last = err_num
 
         #exit
-        if err_num / points_number < 0.1: break 
+        if err_num / points_number < 0.05: break 
         if last < err_num and epoch > 30: break
         if epoch > 50: break
 
