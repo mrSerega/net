@@ -76,30 +76,79 @@ class Layer:
 
         # return np.array(grad.dot(dadz)) #dot(w.transpose()))
         
-# class net:
+class net:
+    def __init__(self,
+        layers,         # [num of neurons] (first - num of inputs)
+        speed           # learning rate
+        ):
+        self.speed = speed
+        for l in range(1,len(layers)):
+            lines = []                      #make W
+            for cur in range(layers[l])
+                line = []
+                for prev in range(layers[l-1])
+                    tmp2.append(random.random())
+                tmp1.append(tmp2)
+            b = []
+            for index in range(layers[l])
+                b.append(0)
+            self.layers.append(Layer(lines,b))
+
+    def forward(self,
+        sample
+        ):
+        for l in self.layers:
+            sample = l.doForward(sample)
+        return sample
+    
+    def backward(self,
+        grad
+        ):
+        for l in range(len(self.layers)):
+            grad = layers[len(self.layers)-1-l].doBackward(grad)
+
+    def update(self):
+        for l in self.layers:
+            l.W = l.W - l.dw * self.speed
+            l.B = l.B - l.db * self.speed
+
+    def predict(self,
+        input
+        ):
+        return forward(input)
+
+    def teach(self,
+        input,
+        output
+        ):
+        ans = getAnswer(self.predict(input))
+        tru_ans = np.array(encode(output,len(ans)))
+        true_ans = np.array([[el] for el in true_ans])
+        da1 = - true_ans / A1 + (1-true_ans) / (1-A1)
+        self.backward(da1)
 
 
 if __name__ == '__main__':
-    layer0 = Layer([[1,2,3,4],[4,3,2,1]],[[1],[1]])
-    layer1 = Layer([[1,2], [2, 1]], [[2],[2]])
-    predict = getAnswer(layer1.doForward(layer0.doForward([[1],[2],[3],[4]])))
+    # layer0 = Layer([[1,2,3,4],[4,3,2,1]],[[1],[1]])
+    # layer1 = Layer([[1,2], [2, 1]], [[2],[2]])
+    # predict = getAnswer(layer1.doForward(layer0.doForward([[1],[2],[3],[4]])))
     
-    true_ans = np.array(encode(0,2), dtype=float)
-    A1 = np.array(layer1.A, dtype=float)
+    # true_ans = np.array(encode(0,2), dtype=float)
+    # A1 = np.array(layer1.A, dtype=float)
 
-    l = loss(predict, true_ans) #  for graph
-    true_ans = np.array([[el] for el in true_ans])
+    # l = loss(predict, true_ans) #  for graph
+    # true_ans = np.array([[el] for el in true_ans])
 
-    if debug: print('true ans: {}'.format(true_ans))
-    if debug: print('A1: {}'.format(A1))
-    if debug: print('1 - true ans: {}'.format(1 - true_ans))
-    if debug: print('1 - A: {}'.format(1 - A1))
+    # if debug: print('true ans: {}'.format(true_ans))
+    # if debug: print('A1: {}'.format(A1))
+    # if debug: print('1 - true ans: {}'.format(1 - true_ans))
+    # if debug: print('1 - A: {}'.format(1 - A1))
 
-    da1 = - true_ans / A1 + (1-true_ans) / (1-A1)
+    # da1 = - true_ans / A1 + (1-true_ans) / (1-A1)
 
-    if debug: print('da1: {}'.format(da1))
+    # if debug: print('da1: {}'.format(da1))
 
-    da0 = layer1.doBackward(da1)
-    if debug: print('d0:\n{}'.format(da0))
+    # da0 = layer1.doBackward(da1)
+    # if debug: print('d0:\n{}'.format(da0))
 
     # layer1.doBackward()
