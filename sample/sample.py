@@ -2,21 +2,21 @@
 # usage: python sample.py <log_name.json> <config_name.json>
 # config example: 
 #   {
-#       "seed": -1,                 зерно для генератора ПСЧ 
-#       "try_num": 10000,           максимально количетсво попыток для создания класса
-#       "dimenision": 2,            количетсво критериев точек класса
-#       "amount": 5,                количество классов
-#       "radius_range": [20,30],    интервал допустимых радиусов классов
-#       "points_range": [40,50],    интревал допустимого количетсва точек классов
-#       "min_distanse": 61,         минимальное рассточние между центрами классов
-#       "max_distanse": 200,        максимальное расстоняие между центрами классов
-#       "max_length": 1000          макисимальная длина измерения поля
+#       "seed": -1,                 
+#       "try_num": 10000,           
+#       "dimenision": 2,            
+#       "amount": 5,                
+#       "radius_range": [20,30],    
+#       "points_range": [40,50],    
+#       "min_distanse": 61,         
+#       "max_distanse": 200,        
+#       "max_length": 1000          
 #   }
 
 import random
 import math
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+# from mpl_toolkits.mplot3d import Axes3D
 import json
 import sys
 import time
@@ -38,14 +38,14 @@ class Sample:
     colors = ['bo', 'go', 'ro', 'co', 'mo', 'yo', 'ko', 'bs', 'gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'b^', 'g^', 'r^', 'c^', 'm^', 'y^', 'k^',]
     
     def __init__(self,
-                try_num, #количество попыток создать класс
-                dimenision, #количество критериев
-                radius_range, #интервал допустимых радиусов классов
-                min_distanse, #минимальное расстояние между центрами классов
-                max_length, #максимальная длина/ширина поля
-                max_distanse, #максимальное расстояние между центрами классов
-                points_range, #интервал допустимого числа точек в классе
-                seed): #зерно рандома
+                try_num, 
+                dimenision, 
+                radius_range, 
+                min_distanse, 
+                max_length, 
+                max_distanse, 
+                points_range, 
+                seed): 
         self.try_num = try_num
         self.dimenision = dimenision
         self.radius_range = radius_range
@@ -135,7 +135,7 @@ class Sample:
         new_class = []
         
         new_class.append(center)
-        for i in range(amount):
+        for i in range(int(amount)):
             new_class.append(self.getRandomVector(rnd_rad, center))
         
         self.classes.append(new_class)
@@ -164,12 +164,12 @@ class Sample:
     
     def logClasses(self):
         data = {}
-        data['dimenision'] = self.dimenision                #meta: размерность точек
-        data['seed'] = self.seed                            #mata: зерно ГПСЧ
-        data['classes'] = []                                #meat: перечень имен классов
+        data['dimenision'] = self.dimenision                #meta: 
+        data['seed'] = self.seed                            #mata: 
+        data['classes'] = []                                #meat: 
         for i in range(len(self.classes)):
-            data['class{}'.format(i)] = self.classes[i]     #добавляем класс в перечень
-            data['classes'].append('class{}'.format(i))     #meta: добавляем имя класса в перечень
+            data['class{}'.format(i)] = self.classes[i]     #
+            data['classes'].append('class{}'.format(i))     #meta:
         with open(sys.argv[1], 'w') as output:
              json.dump(data, output)
 
@@ -193,7 +193,7 @@ if __name__ == '__main__':
                     max_distanse = data['max_distanse'],
                     max_length = data['max_length'],
                     seed = data['seed']) 
-    for i in range(data['amount']):
+    for i in range(int(data['amount'])):
         sample.createClass()
     sample.logClasses()
     sample.showClasses()

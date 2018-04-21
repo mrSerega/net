@@ -1,35 +1,50 @@
 import numpy as np
 import random
+import json
+import matplotlib.pyplot as plt
+import copy
 
 debug = False
 
 def loadData(path_to_input):
     pass
 
-def normilizeData(data):
-    pass
+def normalizeData(X):
+    tmparr = []
+    tmparr = np.array(tmparr)
+    for i in range (len(X)):
+        tmparr=np.append(tmparr,X[i])
+    # print(tmparr.len())
+    mean = np.mean(tmparr)
+    std = np.std(tmparr)
+    for i in range (len(X)):
+        X[i]=(X[i] - mean) / std
+    return X
 
 def encode(answer, class_number):
     ans = [0 for index in range(class_number)]
     ans[answer] = 1
     return ans
 
-def getTrainPack(pack, train_percent):
-    return
-
 def sigm(x):
     return 1 / (1+np.exp(-x))
+
+def dsigm(x):
+    return sigm(x) * (1-sigm(x))
 
 def getAnswer(answer):                           #[a1, a2]
     max_value = max(answer)
     return [1 if max_value == el else 0 for el in answer]
 
 def loss(out, true_out):
+    # print (out)
+    # print (true_out)
     eps = 1e-10
     size = len(out)
     out = np.clip(out, eps, 1-eps)
     s = [true_out[index] * np.log(out[index])+(1-true_out[index]) * (np.log(1-out[index])) for index in range(size) ]
-    s = sum(s) / size
+    s = -1 * sum(s) / size
+    # print (s)
     return s
 
 class Layer:
@@ -59,7 +74,7 @@ class Layer:
         # print ('***')
         # print ('grad: {}'.format(grad))      
         # print ('***')
-        dadz = np.array([sigm(self.Z) * grad]).transpose()
+        dadz = np.array([dsigm(self.Z) * grad]).transpose()
         # print('dadz: {}'.format(dadz))
         
 
@@ -95,6 +110,7 @@ class Net:
         layers,         # [num of neurons] (first - num of inputs)
         speed           # learning rate
         ):
+        self.loss_g = []
         self.layers = []
         self.speed = speed
         for l in range(1,len(layers)):
@@ -113,7 +129,7 @@ class Net:
         sample
         ):
         for l in self.layers:
-            sample = l.doForward(sample)
+            sample = copy.deepcopy(l.doForward(sample))
         return sample
     
     def backward(self,
@@ -123,7 +139,7 @@ class Net:
             # print ('###')
             # print (grad)
             # print ('###')
-            grad = self.layers[len(self.layers)-1-l].doBackward(grad)
+            grad = copy.deepcopy(self.layers[len(self.layers)-1-l].doBackward(grad))
         # print ('###')
         # print (grad)
         # print ('###')
@@ -147,10 +163,15 @@ class Net:
         input,
         output
         ):
+        eps = 1e-5
         ans = getAnswer(self.predict(input))
         true_ans = np.array(encode(output,len(ans)))
         # true_ans = np.array([[el] for el in true_ans])
         A1 = np.array(self.layers[-1].A, dtype=float)
+        self.loss_g.append(loss(A1,true_ans))
+        
+        # print (loss(getAnswer(A1), encode(output,len(A1))))
+        A1 = np.clip(A1, eps, 1-eps)
         da1 = - true_ans / A1 + (1-true_ans) / (1-A1)
         # print ('teach')
         # print (da1)
@@ -160,60 +181,85 @@ class Net:
 
 
 if __name__ == '__main__':
-    # layer0 = Layer([[1,2,3,4],[4,3,2,1]],[[1],[1]])
-    # layer1 = Layer([[1,2], [2, 1]], [[2],[2]])
-    # predict = getAnswer(layer1.doForward(layer0.doForward([[1],[2],[3],[4]])))
     
-    # true_ans = np.array(encode(0,2), dtype=float)
-    # A1 = np.array(layer1.A, dtype=float)
+    #config me here
 
-    # l = loss(predict, true_ans) #  for graph
-    # true_ans = np.array([[el] for el in true_ans])
+    train_part = 0.8
 
-    # if debug: print('true ans: {}'.format(true_ans))
-    # if debug: print('A1: {}'.format(A1))
-    # if debug: print('1 - true ans: {}'.format(1 - true_ans))
-    # if debug: print('1 - A: {}'.format(1 - A1))
+    #^^^^^^^^^^^^^^
 
-    # da1 = - true_ans / A1 + (1-true_ans) / (1-A1)
+    with open('./../sample/sample.json') as sample:
+        data = json.load(sample)
+        sample.close
 
-    # if debug: print('da1: {}'.format(da1))
+    classes_names = data['classes']
+    input_size = data['dimenision']
+    output_size = len(classes_names)
+    classes = []
+    for c in classes_names: classes.append(data[c])
+    classes = normalizeData(classes)
+    sample = {
+        'class_names': [],
+        'class_index': [],
+        'train': [],
+        'check': []
+    }
+    sample_dots = []
+    for index in range(len(classes_names)):
+        sample['class_names'].append(classes_names[index])
+        sample['class_index'].append(index)
+        for jndex in range(len(classes[index])):
+            sample_dots.append((classes[index][jndex],index))
+    train_index = int(len(sample_dots) * train_part)
+    random.shuffle(sample_dots)
+    sample['train'] = sample_dots[:train_index]
+    sample['check'] = sample_dots[train_index+1:]
 
-    # da0 = layer1.doBackward(da1)
-    # if debug: print('d0:\n{}'.format(da0))
 
-    # layer1.doBackward()
-    net = Net([2,5,5], 0.05)
-    # for l in net.layers:
-    #     print ('---')
-    #     print (l.W.shape)
-    for i in range(25):
-        for j in range(100):
-            net.teach([i/100,i/100],0)
-            net.teach([-i/100,i/100],1)
-            net.teach([i/100,-i/100],2)
-            net.teach([-i/100,-i/100],3)
-        #net.teach([0.9, 0.9],0)
-        #net.teach([0.1, 0.1],0)
-        # net.teach([0.3, 0.3],0)
-        # net.teach([0.4, 0.4],0)
-        #net.teach([-0.1, -0.1],1)
-        #net.teach([-0.9, -0.9],1)
-        # net.teach([-0.3, -0.3],1)
-        # net.teach([-0.4, -0.4],1)
-        #net.teach([-0.1, 0.1],2)
-        #net.teach([-0.9, 0.9],2)
-        # net.teach([-0.3, 0.3],2)
-        # net.teach([-0.4, 0.4],2)
-        #net.teach([0.1, -0.1],3)
-        #net.teach([0.9, -0.9],3)
-        # net.teach([0.3, -0.3],3)
-        # net.teach([0.4, -0.4],3)
-    print (net.predict([0.5,0.5]))
-    print (net.predict([-0.5,0.5]))
-    print (net.predict([0.5,-0.5]))
-    print (net.predict([-0.5,-0.5]))
-    print (getAnswer(net.predict([0.5,0.5])))
-    print (getAnswer(net.predict([-0.5,0.5])))
-    print (getAnswer(net.predict([0.5,-0.5])))
-    print (getAnswer(net.predict([-0.5,-0.5])))
+    net = Net([input_size,5,output_size], 0.05)
+    
+    best_epoch = 0
+    best_epoch_raiting = 1
+    best_net = copy.deepcopy(net)
+    mem = []
+    raitnig = [[],[]]
+
+    for epoch in range(1000):
+
+        random.shuffle(sample['train'])
+        
+        for dot in sample['train']: net.teach(dot[0],dot[1])
+        
+        over_all = len(sample['train'])
+        miss_number = 0
+
+        for dot in sample['train']:
+            if not (getAnswer(net.predict(dot[0])) == encode(dot[1],len(sample['class_names']))):
+                miss_number += 1
+        
+        for dot in sample['check']:
+            if not (getAnswer(net.predict(dot[0])) == encode(dot[1],len(sample['class_names']))):
+                miss_number += 1
+
+        current_raiting = miss_number/over_all
+        mem.append(current_raiting)
+
+        if current_raiting < best_epoch_raiting:
+            best_epoch = epoch
+            best_net = copy.deepcopy(net)
+
+        if epoch > 20:
+            if abs(current_raiting-mem[epoch - 2]) < 0.01:
+                if abs(current_raiting-mem[epoch - 3]) < 0.01:
+                    if abs(current_raiting-mem[epoch - 4]) < 0.01:
+                        if abs(current_raiting-mem[epoch - 5]) < 0.01:
+                            if abs(current_raiting-mem[epoch - 6]) < 0.01:
+                                print (111)
+                                break
+        print (current_raiting)
+        raitnig[0].append(epoch)
+        raitnig[1].append(current_raiting)
+
+    plt.plot([index for index in range(len(net.loss_g))],[l for l in net.loss_g])
+    plt.plot([index for index in range(len(mem)],[l for l in mem],'g')
+    plt.show()
