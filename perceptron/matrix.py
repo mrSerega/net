@@ -75,11 +75,12 @@ class Layer:
 
         # print ('X {}'.format(self.X))
         self.dw = dadz.dot(self.X.transpose())
-        print ('***')
-        print (self.dw)
-        print ('***')
+        # print ('***')
+        # print (self.dw)
+        # print ('dick: {}'.format(np.dot(np.transpose(self.W),dadz).transpose()))
         # if debug: print('dw:\n{}'.format(self.dw))
-        return np.dot(np.transpose(self.W),dadz)
+        # print ('***')
+        return np.dot(np.transpose(self.W),dadz).transpose()[0]
         
 
         # if debug: print('back grad: {}'.format(grad))
@@ -119,20 +120,23 @@ class Net:
         grad
         ):
         for l in range(len(self.layers)):
-            print ('###')
-            print (grad)
-            print ('###')
+            # print ('###')
+            # print (grad)
+            # print ('###')
             grad = self.layers[len(self.layers)-1-l].doBackward(grad)
+        # print ('###')
+        # print (grad)
+        # print ('###')
 
     def update(self):
         for l in self.layers:
-            print ('----')
-            print('W\n{}'.format(l.W))
-            print('dw\n{}'.format(l.dw))
+            # print ('----')
+            # print('W\n{}'.format(l.W))
+            # print('dw\n{}'.format(l.dw))
             l.W = l.W - l.dw * self.speed
-            print('W\n{}'.format(l.W))
+            # print('W\n{}'.format(l.W))
             l.B = l.B - l.db * self.speed
-            print ('----')
+            # print ('----')
 
     def predict(self,
         input
