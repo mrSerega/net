@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 debug = False
 
@@ -45,27 +46,39 @@ class Layer:
         ):
         self.X = np.array(x,dtype = float)
         self.Z = self.W.dot(self.X) + self.B
-        self.A = np.array([[sigm(el[0])] for el in self.Z])
+        # self.A = np.array([[sigm(el)] for el in self.Z])
+        self.A = sigm(self.Z)
+        # print ('A {}'.format(self.A))
         return self.A
 
     def doBackward(self,
         grad            #grad from next layer
         ):              
-        if debug: print('----backward----')
 
-        if debug: print('self.Z: {}'.format(self.Z))
-        if debug: print('grad: {}'.format(grad))
-
-        dadz = sigm(self.Z) * grad
-        if debug: print('dadz: {}'.format(dadz))
+        # print ('self.Z '.format(self.Z))
+        # print ('***')
+        # print ('grad: {}'.format(grad))      
+        # print ('***')
+        dadz = np.array([sigm(self.Z) * grad]).transpose()
+        # print('dadz: {}'.format(dadz))
         
 
-        # self.dw = grad.dot(dadz).dot(self.A.transpose())    ###
         # if debug: print('dw:\n{}'.format(self.dw))
         self.db = dadz.sum()                               ### 
-        if debug: print('db:\n{}'.format(self.db))
+        # if debug: print('db:\n{}'.format(self.db))
+        # print ('dadz {}'.format(dadz))
+
+        if len(self.X.shape) == 1:
+            self.X = self.X.reshape(self.X.shape[0], 1)
+        else:
+            self.X = np.transpose(self.X)
+
+        # print ('X {}'.format(self.X))
         self.dw = dadz.dot(self.X.transpose())
-        if debug: print('dw:\n{}'.format(self.dw))
+        print ('***')
+        print (self.dw)
+        print ('***')
+        # if debug: print('dw:\n{}'.format(self.dw))
         return np.dot(np.transpose(self.W),dadz)
         
 
@@ -76,21 +89,22 @@ class Layer:
 
         # return np.array(grad.dot(dadz)) #dot(w.transpose()))
         
-class net:
+class Net:
     def __init__(self,
         layers,         # [num of neurons] (first - num of inputs)
         speed           # learning rate
         ):
+        self.layers = []
         self.speed = speed
         for l in range(1,len(layers)):
             lines = []                      #make W
-            for cur in range(layers[l])
+            for cur in range(layers[l]):
                 line = []
-                for prev in range(layers[l-1])
-                    tmp2.append(random.random())
-                tmp1.append(tmp2)
+                for prev in range(layers[l-1]):
+                    line.append(random.random())
+                lines.append(line)
             b = []
-            for index in range(layers[l])
+            for index in range(layers[l]):
                 b.append(0)
             self.layers.append(Layer(lines,b))
 
@@ -105,27 +119,40 @@ class net:
         grad
         ):
         for l in range(len(self.layers)):
-            grad = layers[len(self.layers)-1-l].doBackward(grad)
+            print ('###')
+            print (grad)
+            print ('###')
+            grad = self.layers[len(self.layers)-1-l].doBackward(grad)
 
     def update(self):
         for l in self.layers:
+            print ('----')
+            print('W\n{}'.format(l.W))
+            print('dw\n{}'.format(l.dw))
             l.W = l.W - l.dw * self.speed
+            print('W\n{}'.format(l.W))
             l.B = l.B - l.db * self.speed
+            print ('----')
 
     def predict(self,
         input
         ):
-        return forward(input)
+        return self.forward(input)
 
     def teach(self,
         input,
         output
         ):
         ans = getAnswer(self.predict(input))
-        tru_ans = np.array(encode(output,len(ans)))
-        true_ans = np.array([[el] for el in true_ans])
+        true_ans = np.array(encode(output,len(ans)))
+        # true_ans = np.array([[el] for el in true_ans])
+        A1 = np.array(self.layers[-1].A, dtype=float)
         da1 = - true_ans / A1 + (1-true_ans) / (1-A1)
+        # print ('teach')
+        # print (da1)
+        # print ('teach')
         self.backward(da1)
+        self.update()
 
 
 if __name__ == '__main__':
@@ -152,3 +179,9 @@ if __name__ == '__main__':
     # if debug: print('d0:\n{}'.format(da0))
 
     # layer1.doBackward()
+    net = Net([2,3,2], 0.05)
+    for l in net.layers:
+        print ('---')
+        print (l.W.shape)
+    net.teach([0.1, 0.1],0)
+    net.teach([0.1, 0.1],0)
