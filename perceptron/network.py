@@ -21,10 +21,10 @@ class Node:
     k = 1
 
     def __init__(self,
-                w,      #веса
-                func,   #функция активации
+                w,      #weight
+                func,   #actication func
                 k,
-                className):     #скорость обучения
+                className):     #learning speed
         self.w = w
         self.func = func
         self.k = k
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     for c in classes:
         values.append(data[c])
-        nodes.append(Node(zeros[:], func, 0.02, c)) #0.05 -- скорость обучения
+        nodes.append(Node(zeros[:], func, 0.05, c)) #0.05 -- lerning speed
 
     epochs = []
     errors = []
@@ -86,7 +86,7 @@ if __name__ == '__main__':
         epoch +=1
         print ('epoch: {}'.format(epoch))
         
-        #эпоха
+        #epoh
         for i in range(teach_amount):
             for c in range(len(values)):
                 # print('class {}'.format(c))
@@ -99,7 +99,7 @@ if __name__ == '__main__':
                         nodes[c].teach(point,1)
                         # print ('{}: {}'.format(nodes[cc].className,nodes[cc].w))
 
-        #проверка
+        #check
         err_num = 0
         for c in range (len(values)):
             for point in values[c][teach_amount:]:
@@ -150,7 +150,7 @@ if __name__ == '__main__':
             for node in nodes:
                 res.append(node.do(point))
             answer = res.index(max(res))
-            print(answer)
+            # print(answer)
             if answer!= c: err_num+=1
 
     print (err_num)
