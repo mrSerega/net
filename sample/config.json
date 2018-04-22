@@ -4,7 +4,7 @@
     "dimenision": 2,
     "amount": 20,
     "radius_range": [20,30],
-    "points_range": [90,100],
+    "points_range": [900,1000],
     "min_distanse": 61,
     "max_distanse": 200,
     "max_length": 1000

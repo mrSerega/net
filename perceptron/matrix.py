@@ -260,6 +260,9 @@ if __name__ == '__main__':
         raitnig[0].append(epoch)
         raitnig[1].append(current_raiting)
 
+    print (raitnig)
+    plt.figure(0)
     plt.plot([index for index in range(len(net.loss_g))],[l for l in net.loss_g])
-    plt.plot([index for index in range(len(mem)],[l for l in mem],'g')
+    plt.figure(1)
+    plt.plot([el for el in raitnig[0]],[el for el in raitnig[1]])
     plt.show()

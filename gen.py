@@ -40,9 +40,9 @@ def float_to_bin(f):
 #     print('')
 
 #config me here ----------------------------------------------------
-mods = ['booth','rosenbrock','sphere', 'rastrigin']
+mods = ['booth','rosenbrock','sphere', 'rastrigin','eggholder']
 
-mode = 'rosenbrock'
+mode = 'eggholder'
 
 pop = 100        #population amount                                         
 gen_len = 64      #(do not config)
@@ -86,6 +86,14 @@ elif mode == 'rastrigin':
             return float(s)
         except:
             return float('Inf')
+elif mode == 'eggholder':
+    d = 2
+    ranges = [[-512,512],[-512,512]]
+    def f(v):
+        v147 = v[1]+47
+        first = -(v147) * math.sin(math.sqrt(abs(v[0]/2 + v147)))
+        second = v[0]*math.sin(math.sqrt(abs(v[0]-v147)))
+        return  first - second
 
 #config me here ----------------------------------------------------
 
