@@ -1,16 +1,28 @@
 import math
 import numpy as np
+import binascii
+import random
 
 
 # config me here
 
-word_length = 7
-hem_power = 4
+word_length = 63
+hem_power = 7
+message = 'hello brand new world my friend'
 
 # ^^^^^^^^^^^^^^
 
+def bits2string(b=None):
+    bb = []
+    while len(b) > 7:
+        bb.append(b[:7])
+        b = b[7:]
+    bb.append(b)
+    return ''.join([chr(int(x, 2)) for x in bb])
+
 def msg2bin(msg, bin_len):
     bin_msg = ' '.join(format(ord(x), 'b') for x in msg)
+    print ('bin_msg: {}'.format(bin_msg))
     bin_msg = bin_msg.replace(' ','')
     ans = []
     while len(bin_msg) > 0:
@@ -77,7 +89,7 @@ def hem_decode(hem_msg, code_power):
         if msg_arr[index] != hem_msg[index]: to_invert += (index+1)
 
     if to_invert == -1 and hem_msg[-1] == tmp_msg[-1]:
-        print ('no error')
+        # print ('no error')
         return hem_msg
 
     if hem_msg[-1] != tmp_msg[-1] and to_invert != -1: 
@@ -85,7 +97,7 @@ def hem_decode(hem_msg, code_power):
         if to_invert < len(hem_msg): 
             msg_arr = hem_msg[:]
             msg_arr[to_invert] = str(int(not bool(hem_msg[to_invert])))
-        return msg_arr
+            return msg_arr
 
     if to_invert != -1 and hem_msg[-1] == tmp_msg[-1]:
         print ('Double error!')
@@ -94,13 +106,38 @@ def hem_decode(hem_msg, code_power):
         print ('cant fix')
         return hem_msg
 
+def bin2ascii(message):
+    msg = message[:]
+    while msg[-1] == '0':
+        msg.pop(-1)
+    msg.pop(-1)
+    msg = ''.join(msg)
+    return bits2string(b=msg)
+
+def delCodeBits(data, code_power):
+    powers = list(range(code_power))
+    powers.reverse()
+    for power in powers:
+        data.pop(2**power-1)
+    data.pop(-1)
+
+def doMistale(package, number_of_mistake):
+    for mistake in range(number_of_mistake):
+        index = int(random.uniform(0,len(package)))
+        package[index] = str(int(not bool(package[index])))
+
 if __name__ == '__main__':
-    bin_msg = msg2bin('hello', word_length)
+    message = message.replace(' ','_')
+    bin_msg = msg2bin(message, word_length)
+    newmsg = []
     for word in bin_msg: 
-        print ('---')
         hc = hem_encode(word, hem_power)
         print (hc)
-        hc[6] = '1'
-        hc[5] = '1'
-        print (hc)
-        print (hem_decode(hc, hem_power))
+        doMistale(hc, 1)
+        hd = hem_decode(hc, hem_power)
+        # hd = hc
+        delCodeBits(hd, hem_power)
+        newmsg.extend(hd)
+    recived = bin2ascii(newmsg).replace('_',' ')
+    print (recived)
+
