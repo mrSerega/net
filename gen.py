@@ -42,7 +42,7 @@ def float_to_bin(f):
 #config me here ----------------------------------------------------
 mods = ['booth','rosenbrock','sphere', 'rastrigin','eggholder']
 
-mode = 'eggholder'
+mode = 'rosenbrock'
 
 pop = 2000     #population amount                                         
 gen_len = 64      #(do not config)
@@ -58,9 +58,13 @@ elif mode == 'rosenbrock':
     ranges = [[-10,10] for el in range(d)] 
     def f(v):
         s = 0
+        vv = [decimal.Decimal(el) for el in v]
         for i in range(d-1):
-            s += float(100 * (decimal.Decimal(v[i+1])-decimal.Decimal(v[i])**2)**2 + decimal.Decimal((1-v[i]))**2)
-        return s
+            first = (vv[i+1] - vv[i]**2)**2
+            second = (1 - vv[i])**2
+            s += (100*first + second)
+            # s += float(100 * (decimal.Decimal(v[i+1])-decimal.Decimal(v[i])**2)**2 + decimal.Decimal((1-v[i]))**2)
+        return float(s)
 elif mode == 'sphere':
     d = 3
     ranges = [[-10,10] for el in range(d)] 
