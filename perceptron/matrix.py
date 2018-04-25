@@ -3,6 +3,7 @@ import random
 import json
 import matplotlib.pyplot as plt
 import copy
+import sys
 
 debug = False
 
@@ -185,7 +186,8 @@ if __name__ == '__main__':
     #config me here
 
     train_part = 0.8
-
+    show = True
+    
     #^^^^^^^^^^^^^^
 
     with open('./../sample/sample.json') as sample:
@@ -198,6 +200,13 @@ if __name__ == '__main__':
     classes = []
     for c in classes_names: classes.append(data[c])
     classes = normalizeData(classes)
+
+    plt.figure(3)
+    plt.xlim((-2,2))
+    plt.ylim((-2,2))
+    for c in classes:
+        plt.plot([el[0] for el in c],[el[1] for el in c],'o')
+
     sample = {
         'class_names': [],
         'class_index': [],
@@ -254,15 +263,30 @@ if __name__ == '__main__':
                     if abs(current_raiting-mem[epoch - 4]) < 0.01:
                         if abs(current_raiting-mem[epoch - 5]) < 0.01:
                             if abs(current_raiting-mem[epoch - 6]) < 0.01:
-                                print (111)
+                                # print (111)
                                 break
-        print (current_raiting)
+        print ('epoch {}: {}'.format(epoch, current_raiting))
         raitnig[0].append(epoch)
         raitnig[1].append(current_raiting)
 
-    print (raitnig)
+    # print (raitnig)
     plt.figure(0)
     plt.plot([index for index in range(len(net.loss_g))],[l for l in net.loss_g])
     plt.figure(1)
     plt.plot([el for el in raitnig[0]],[el for el in raitnig[1]])
+    
+    colors = ['bo', 'go', 'ro', 'co', 'mo', 'yo', 'ko', 'bs', 'gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'b^', 'g^', 'r^', 'c^', 'm^', 'y^', 'k^',]
+    plt.figure(2)
+    
+    if show:
+        
+        step = 0.05
+        amount = int(4 / step)
+        for x in range(amount):
+            for y in range(amount):
+                plt.plot(   -2 + x*step,
+                            -2 + y*step,
+                            colors[getAnswer((net.predict([-2 + x*step,-2 + y*step]))).index(1)])
+            sys.stdout.write('{}/{}\r'.format(x,amount))
+
     plt.show()
