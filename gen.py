@@ -44,9 +44,9 @@ mods = ['booth','rosenbrock','sphere', 'rastrigin','eggholder']
 
 mode = 'eggholder'
 
-pop = 100        #population amount                                         
+pop = 2000     #population amount                                         
 gen_len = 64      #(do not config)
-p = 0.50           #mutation 
+p = 0.05           #mutation 
 
 if mode == 'booth':
     d = 2                                #demenision of var    (do not config)                                      
@@ -54,7 +54,7 @@ if mode == 'booth':
     def f(v):
         return float((decimal.Decimal(v[0])+decimal.Decimal(2*v[1])-7)**2 + (decimal.Decimal(2*v[0])+decimal.Decimal(v[1])-5)**2)       #ranges for each dem
 elif mode == 'rosenbrock':
-    d = 6                                      #demenision of var  
+    d = 3                                      #demenision of var  
     ranges = [[-10,10] for el in range(d)] 
     def f(v):
         s = 0
@@ -102,66 +102,101 @@ def init_sample(d, ranges, amount):
 
 
 
-def cross(mom, dad):
-    bin_mom = ''.join([float_to_bin(gen) for gen in mom])
-    bin_dad = ''.join([float_to_bin(gen) for gen in dad])
-    l = len(bin_mom)
-    k = rnd.randint(0,l)
-    first = bin_mom[0:k]+bin_dad[k+1:l]
-    second = bin_dad[0:k]+bin_dad[k+1:l]
-    gen_nums = int(l / gen_len)
-    f = []
-    s = []
-    for index in range(gen_nums):
-        f.append(bin_to_float(first[index*gen_len:(index+1)*gen_len]))
-        s.append(bin_to_float(second[index*gen_len:(index+1)*gen_len]))
-    # print ('----')
-    # print (mom)
-    # print (dad)
-    # print (s)
-    # print (f)
-    return s, f
-    
-    
+def cross(mom, dad, cross_type=0):
+    if cross_type == 0:
+        bin_mom = ''.join([float_to_bin(gen) for gen in mom])
+        bin_dad = ''.join([float_to_bin(gen) for gen in dad])
+        l = len(bin_mom)
+        k = rnd.randint(0,l)
+        first = bin_mom[0:k]+bin_dad[k+1:l]
+        second = bin_dad[0:k]+bin_dad[k+1:l]
+        gen_nums = int(l / gen_len)
+        f = []
+        s = []
+        for index in range(gen_nums):
+            f.append(bin_to_float(first[index*gen_len:(index+1)*gen_len]))
+            s.append(bin_to_float(second[index*gen_len:(index+1)*gen_len]))
+        # print ('----')
+        # print (mom)
+        # print (dad)
+        # print (s)
+        # print (f)
+        return s, f   
+    elif cross_type == 1:
+        bin_mom = []
+        for gen in mom: bin_mom.append(float_to_bin(gen))
+        bin_dad = []
+        for gen in dad: bin_dad.append(float_to_bin(gen))
 
+        res = [[],[]]
+
+        for gen_index in range(len(bin_mom)):
+            l = len(bin_mom)
+            k = rnd.randint(0,l)
+            first = bin_mom[gen_index][:k]+bin_dad[gen_index][k:]
+            second = bin_dad[gen_index][:k]+bin_dad[gen_index][k:]
+            res[0].append(bin_to_float(first))
+            res[1].append(bin_to_float(second))
+        
+        return res[0], res[1]
 
 def make_love(population):
     rnd.shuffle(population)
     l = len(population)
     for index in range(int(l/2)):
-        siblings = cross(population[index],population[l-1-index])
+        siblings = cross(population[index],population[l-1-index], cross_type = 1)
         population.append(siblings[0])
         population.append(siblings[1])
 
 def select(population):
     sample.sort(key=f)
     # print (population)
+    # for dot_index in range(len(population)):
+    #     try:
+    #         for el_index in range(len(population[dot_index])):
+    #             try:
+    #                 if (population[dot_index][el_index] < ranges[el_index][0]) or (population[dot_index][el_index] > ranges[el_index][1]):
+    #                     population.pop(dot_index)
+    #             except Exception:
+    #                 break
+    #     except Exception:
+    #         continue
+
     return sample[0:pop]
 
-def mutate(creacher):
-    bin_cre = ''.join([float_to_bin(gen) for gen in creacher])
-    for index in range(len(bin_cre)):
-        isMutate = rnd.random()
-        # print (isMutate)
-        if 1-isMutate > p:
-            bin_cre = list(bin_cre)
-            if bin_cre[index] == '0': bin_cre[index] = '1' 
-            if bin_cre[index] == '1': bin_cre[index] = '0' 
-            bin_cre = ''.join(bin_cre)
-    l = len(bin_cre)
-    gen_nums = int(l / gen_len)
-    c = []
-    for index in range(gen_nums):
-        c.append(bin_to_float(bin_cre[index*gen_len:(index+1)*gen_len]))
-    # print (c)
-    return c
+def mutate(creacher, mutate_mode = 1):
+    if mutate_mode == 0:
+        bin_cre = ''.join([float_to_bin(gen) for gen in creacher])
+        for index in range(len(bin_cre)):
+            isMutate = rnd.random()
+            # print (isMutate)
+            if 1-isMutate > p:
+                bin_cre = list(bin_cre)
+                if bin_cre[index] == '0': bin_cre[index] = '1' 
+                if bin_cre[index] == '1': bin_cre[index] = '0' 
+                bin_cre = ''.join(bin_cre)
+        l = len(bin_cre)
+        gen_nums = int(l / gen_len)
+        c = []
+        for index in range(gen_nums):
+            c.append(bin_to_float(bin_cre[index*gen_len:(index+1)*gen_len]))
+        # print (c)
+        return c
+    elif mutate_mode == 1:
+        new_creacher = creacher[:]
+        for index in range(len(new_creacher)):
+            new_creacher[index] += rnd.random() -0.5
+        return new_creacher
 
 if __name__ == '__main__':
     sample = init_sample(d, ranges, pop)
     while (True):
         make_love(sample)
         length = len(sample)
-        for index in range(length): sample.append(mutate(sample[index]))
+        for index in range(length): sample.append(mutate(sample[index], mutate_mode = 1))
         sample = select(sample)        
-        print ('value: {} / {}\r'.format(f(sample[0]),sample[0]))
+        # output
+        val = "{0:.3f}".format(f(sample[0]))
+        dot = ["{0:.3f}".format(el) for el in sample[0]]
+        print ('value: {} / {}'.format(val,dot))
 
