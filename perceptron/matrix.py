@@ -225,7 +225,7 @@ if __name__ == '__main__':
     sample['check'] = sample_dots[train_index+1:]
 
 
-    net = Net([input_size,5,output_size], 0.05)
+    net = Net([input_size,output_size], 0.05) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
     best_epoch = 0
     best_epoch_raiting = 1
@@ -257,12 +257,14 @@ if __name__ == '__main__':
             best_epoch = epoch
             best_net = copy.deepcopy(net)
 
+        if epoch > 200: break
+
         if epoch > 20:
             if abs(current_raiting-mem[epoch - 2]) < 0.01:
                 if abs(current_raiting-mem[epoch - 3]) < 0.01:
                     if abs(current_raiting-mem[epoch - 4]) < 0.01:
                         if abs(current_raiting-mem[epoch - 5]) < 0.01:
-                            if abs(current_raiting-mem[epoch - 6]) < 0.01:
+                            if abs(current_raiting-mem[epoch - 6]) < 0.005:
                                 # print (111)
                                 break
         print ('epoch {}: {}'.format(epoch, current_raiting))
@@ -271,15 +273,14 @@ if __name__ == '__main__':
 
     # print (raitnig)
     plt.figure(0)
-    plt.plot([index for index in range(len(net.loss_g))],[l for l in net.loss_g])
-    plt.figure(1)
+    # plt.plot([index for index in range(len(net.loss_g))],[l for l in net.loss_g])
+    # plt.figure(1)
     plt.plot([el for el in raitnig[0]],[el for el in raitnig[1]])
     
     colors = ['bo', 'go', 'ro', 'co', 'mo', 'yo', 'ko', 'bs', 'gs', 'rs', 'cs', 'ms', 'ys', 'ks', 'b^', 'g^', 'r^', 'c^', 'm^', 'y^', 'k^',]
-    plt.figure(2)
     
     if show:
-        
+        plt.figure(2)
         step = 0.05
         amount = int(4 / step)
         for x in range(amount):

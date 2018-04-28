@@ -1,11 +1,11 @@
 {
-    "seed": -1,
+    "seed": 201,
     "try_num": 10000,
     "dimenision": 2,
-    "amount": 5,
-    "radius_range": [20,30],
-    "points_range": [40,50],
-    "min_distanse": 40,
-    "max_distanse": 50,
+    "amount": 7,
+    "radius_range": [30,30],
+    "points_range": [250,250],
+    "min_distanse": 55,
+    "max_distanse": 65,
     "max_length": 100
 }

@@ -40,11 +40,11 @@ def float_to_bin(f):
 #     print('')
 
 #config me here ----------------------------------------------------
-mods = ['booth','rosenbrock','sphere', 'rastrigin','eggholder']
+mods = ['booth','rosenbrock','sphere', 'rastrigin','eggholder', 'ackley' ]
 
-mode = 'rosenbrock'
+mode = 'booth'
 
-pop = 2000     #population amount                                         
+pop = 1000    #population amount                                         
 gen_len = 64      #(do not config)
 p = 0.05           #mutation 
 
@@ -98,6 +98,32 @@ elif mode == 'eggholder':
         first = -(v147) * math.sin(math.sqrt(abs(v[0]/2 + v147)))
         second = v[0]*math.sin(math.sqrt(abs(v[0]-v147)))
         return  first - second
+elif mode == 'ackley':
+    d = 2
+    ranges = [[-5,5],[-5,5]]
+    def f(v):
+        try:
+            vv = [decimal.Decimal(el) for el in v]
+            firstxx = vv[0]**2
+            firstyy = vv[1]**2
+            sq = math.sqrt(decimal.Decimal(0.5)*(firstxx+firstyy))
+            first = -20*math.exp(-0.2 * sq)
+            cosargx = 2*math.pi*float(vv[0])
+            secondcosx = math.cos(cosargx)
+            cosargy = 2*math.pi*float(vv[1])
+            secondcosy = math.cos(cosargy)
+            second = math.exp(0.5 * (secondcosx + secondcosy))
+            third = math.e + 20
+            return  first - second + third
+        except Exception:
+            return float('inf')
+elif mode == 'bukin':
+    d = 2
+    ranges = [[-15,15],[-3,3]]
+    def f(v):
+        vv = [decimal.Decimal(el) for el in v]
+        return 100 * math.sqrt( abs( float(vv[1]) - 0.01 * float(vv[0]**2) ) ) + 0.01 * abs( float(vv[0] + 10) )
+
 
 #config me here ----------------------------------------------------
 
@@ -154,18 +180,12 @@ def make_love(population):
 
 def select(population):
     sample.sort(key=f)
-    # print (population)
-    # for dot_index in range(len(population)):
-    #     try:
-    #         for el_index in range(len(population[dot_index])):
-    #             try:
-    #                 if (population[dot_index][el_index] < ranges[el_index][0]) or (population[dot_index][el_index] > ranges[el_index][1]):
-    #                     population.pop(dot_index)
-    #             except Exception:
-    #                 break
-    #     except Exception:
-    #         continue
-
+    for dot_index in range(len(population)):
+        for el_index in range(len(population[dot_index])):
+            if (population[dot_index][el_index] < ranges[el_index][0]):
+                population[dot_index][el_index] = ranges[el_index][0]
+            elif (population[dot_index][el_index] > ranges[el_index][1]):
+                population[dot_index][el_index] = ranges[el_index][1]
     return sample[0:pop]
 
 def mutate(creacher, mutate_mode = 1):
@@ -189,7 +209,7 @@ def mutate(creacher, mutate_mode = 1):
     elif mutate_mode == 1:
         new_creacher = creacher[:]
         for index in range(len(new_creacher)):
-            new_creacher[index] += rnd.random() -0.5
+            new_creacher[index] += rnd.random()* -0.5
         return new_creacher
 
 if __name__ == '__main__':
@@ -197,10 +217,10 @@ if __name__ == '__main__':
     while (True):
         make_love(sample)
         length = len(sample)
-        for index in range(length): sample.append(mutate(sample[index], mutate_mode = 1))
+        for index in range(length): sample.append(mutate(sample[index], mutate_mode = 0))
         sample = select(sample)        
         # output
-        val = "{0:.3f}".format(f(sample[0]))
-        dot = ["{0:.3f}".format(el) for el in sample[0]]
+        val = "{0:.6f}".format(f(sample[0]))
+        dot = ["{0:.2f}".format(el) for el in sample[0]]
         print ('value: {} / {}'.format(val,dot))
 

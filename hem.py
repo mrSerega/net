@@ -9,8 +9,9 @@ import random
 debug = False
 word_length = 63
 hem_power = 7
-message = 'hello brand new world my friend'
-num_of_mis = 1
+message = 'Theoretically it means just that, but in reality life-term prisoners do not serve the sentence. Police killer Palle Sorensen, paroled after 32 years and now 90, and Naum Conevski, jailed in 1984 for killing two young men, are unusual in having served considerably more than the average of about 16 years.'
+num_of_mis = 2
+fix = True
 
 # ^^^^^^^^^^^^^^
 
@@ -28,7 +29,13 @@ def bits2string(b=None):
     return ''.join([chr(int(x, 2)) for x in bb])
 
 def msg2bin(msg, bin_len):
-    bin_msg = ' '.join(format(ord(x), 'b') for x in msg)
+    bin_msg = ''
+    for x in msg:
+        tmp=format(ord(x), 'b')
+        if len(tmp)==6:
+            tmp='0'+tmp
+        a = ''.join(tmp)
+        bin_msg = bin_msg + a
     # print ('bin_msg: {}'.format(bin_msg))
     bin_msg = bin_msg.replace(' ','')
     ans = []
@@ -125,7 +132,10 @@ def hem_decode(hem_msg, code_power):
         print ('Double error!')
         return hem_msg
     else:
-        print ('cant fix')
+        # if to_invert == len(msg_arr)+1:
+        #     # print ('error in last bit')
+        # else:
+        #     # print ('cant fix')
         return hem_msg
 
 def bin2ascii(message):
@@ -148,8 +158,20 @@ def doMistale(package, number_of_mistake):
         if debug: print ('do mistake in {}'.format(index))
         package[index] = inverse(package[index])
 
+# message = message.replace(',','COMA')
+# message = message.replace('.','DOT')
+# message = message.replace('1','ONE')
+# message = message.replace('2','TWO')
+# message = message.replace('3','THRE')
+# message = message.replace('4','FOUR')
+# message = message.replace('5','FIVE')
+# message = message.replace('6','SIX')
+# message = message.replace('7','SEVEN')
+# message = message.replace('8','EIGHT')
+# message = message.replace('9','NINE')
+# message = message.replace('0','ZERO')
+
 if __name__ == '__main__':
-    message = message.replace(' ','_')
     bin_msg = msg2bin(message, word_length)
     newmsg = []
     for word in bin_msg: 
@@ -160,10 +182,24 @@ if __name__ == '__main__':
         doMistale(hc, num_of_mis)
         if debug: print ('after: {}'.format(hc))
         # print (hc)
-        hd = hem_decode(hc, hem_power)
-        # hd = hc
+        if fix:
+            hd = hem_decode(hc, hem_power)
+        else:
+            hd = hc
         delCodeBits(hd, hem_power)
         newmsg.extend(hd)
-    recived = bin2ascii(newmsg).replace('_',' ')
+    recived = bin2ascii(newmsg)
+    # recived = recived.replace('COMA',',')
+    # recived = recived.replace('DOT','.')
+    # recived = recived.replace('ONE','1')
+    # recived = recived.replace('TWO','2')
+    # recived = recived.replace('THRE','3')
+    # recived = recived.replace('FOUR','4')
+    # recived = recived.replace('FIVE','5')
+    # recived = recived.replace('SIX','6')
+    # recived = recived.replace('SEVEN','7')
+    # recived = recived.replace('EIGHT','8')
+    # recived = recived.replace('NINE','9')
+    # recived = recived.replace('ZERO','10')
     print (recived)
 

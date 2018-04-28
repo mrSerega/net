@@ -105,13 +105,22 @@ class Sample:
                 
             good_class = True
 
-            for j in range(len(self.classes)):
-                if self.getDistance(center,self.classes[j][0]) < self.min_distanse:
+            myNewMode = 1 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+            if myNewMode == 0:
+                for j in range(len(self.classes)):
+                    if self.getDistance(center,self.classes[j][0]) > self.max_distanse:
+                        good_class = False
+                        break
+            elif myNewMode == 1:
+                for j in range(len(self.classes)):
                     good_class = False
-                    break
+                    if not (self.getDistance(center,self.classes[j][0]) > self.max_distanse):
+                        good_class = True
+                        break
 
             for j in range(len(self.classes)):
-                if self.getDistance(center,self.classes[j][0]) > self.max_distanse:
+                if self.getDistance(center,self.classes[j][0]) < self.min_distanse:
                     good_class = False
                     break
                 
