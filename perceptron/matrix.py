@@ -4,6 +4,7 @@ import json
 import matplotlib.pyplot as plt
 import copy
 import sys
+from sklearn.datasets import load_iris
 
 debug = False
 
@@ -123,7 +124,7 @@ class Net:
                 lines.append(line)
             b = []
             for index in range(layers[l]):
-                b.append(0)
+                b.append(random.random()) #////////////////
             self.layers.append(Layer(lines,b))
 
     def forward(self,
@@ -153,6 +154,7 @@ class Net:
             l.W = l.W - l.dw * self.speed
             # print('W\n{}'.format(l.W))
             l.B = l.B - l.db * self.speed
+            # print (l.db)
             # print ('----')
 
     def predict(self,
@@ -182,15 +184,26 @@ class Net:
 
 
 if __name__ == '__main__':
+
+    # iris = load_iris()
+    # print (iris)
+
     
     #config me here
 
-    train_part = 0.8
-    show = True
+    train_part = 1
+    show = False
     
     #^^^^^^^^^^^^^^
 
-    with open('./../sample/sample.json') as sample:
+    mode_sample = 'i'
+
+    if mode_sample == 'i':
+        sample_name = 'iris.json'
+    if mode_sample == 's':
+        sample_name = 'sample.json'
+
+    with open('./../sample (done)/{}'.format(sample_name)) as sample:
         data = json.load(sample)
         sample.close
 
@@ -201,11 +214,12 @@ if __name__ == '__main__':
     for c in classes_names: classes.append(data[c])
     classes = normalizeData(classes)
 
-    plt.figure(3)
-    plt.xlim((-2,2))
-    plt.ylim((-2,2))
-    for c in classes:
-        plt.plot([el[0] for el in c],[el[1] for el in c],'o')
+    if show:
+        plt.figure(3)
+        plt.xlim((-2,2))
+        plt.ylim((-2,2))
+        for c in classes:
+            plt.plot([el[0] for el in c],[el[1] for el in c],'o')
 
     sample = {
         'class_names': [],
@@ -225,7 +239,7 @@ if __name__ == '__main__':
     sample['check'] = sample_dots[train_index+1:]
 
 
-    net = Net([input_size,output_size], 0.05) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    net = Net([input_size,5,output_size], 0.05) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
     best_epoch = 0
     best_epoch_raiting = 1
@@ -235,7 +249,7 @@ if __name__ == '__main__':
 
     for epoch in range(1000):
 
-        random.shuffle(sample['train'])
+        # random.shuffle(sample['train'])
         
         for dot in sample['train']: net.teach(dot[0],dot[1])
         
@@ -259,14 +273,15 @@ if __name__ == '__main__':
 
         if epoch > 200: break
 
-        if epoch > 20:
-            if abs(current_raiting-mem[epoch - 2]) < 0.01:
-                if abs(current_raiting-mem[epoch - 3]) < 0.01:
-                    if abs(current_raiting-mem[epoch - 4]) < 0.01:
-                        if abs(current_raiting-mem[epoch - 5]) < 0.01:
-                            if abs(current_raiting-mem[epoch - 6]) < 0.005:
-                                # print (111)
-                                break
+        if sample_name != 'iris.json':
+            if epoch > 20:
+                if abs(current_raiting-mem[epoch - 2]) < 0.005:
+                    if abs(current_raiting-mem[epoch - 3]) < 0.005:
+                        if abs(current_raiting-mem[epoch - 4]) < 0.005:
+                            if abs(current_raiting-mem[epoch - 5]) < 0.005:
+                                if abs(current_raiting-mem[epoch - 6]) < 0.005:
+                                    # print (111)
+                                    break
         print ('epoch {}: {}'.format(epoch, current_raiting))
         raitnig[0].append(epoch)
         raitnig[1].append(current_raiting)
@@ -287,7 +302,7 @@ if __name__ == '__main__':
             for y in range(amount):
                 plt.plot(   -2 + x*step,
                             -2 + y*step,
-                            colors[getAnswer((net.predict([-2 + x*step,-2 + y*step]))).index(1)])
+                            colors[getAnswer((best_net.predict([-2 + x*step,-2 + y*step]))).index(1)])
             sys.stdout.write('{}/{}\r'.format(x,amount))
 
     plt.show()
