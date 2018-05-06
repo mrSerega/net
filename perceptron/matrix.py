@@ -6,6 +6,8 @@ import copy
 import sys
 from sklearn.datasets import load_iris
 
+#[6.0,2.7,	5.1,	1.6	],2 85
+
 debug = False
 
 def loadData(path_to_input):
@@ -228,18 +230,20 @@ if __name__ == '__main__':
         'check': []
     }
     sample_dots = []
+    id = 0
     for index in range(len(classes_names)):
         sample['class_names'].append(classes_names[index])
         sample['class_index'].append(index)
         for jndex in range(len(classes[index])):
-            sample_dots.append((classes[index][jndex],index))
+            sample_dots.append((classes[index][jndex],index,id))
+            id+=1
     train_index = int(len(sample_dots) * train_part)
     random.shuffle(sample_dots)
     sample['train'] = sample_dots[:train_index]
     sample['check'] = sample_dots[train_index+1:]
 
 
-    net = Net([input_size,5,output_size], 0.05) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    net = Net([input_size,5,output_size], 0.01) #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     
     best_epoch = 0
     best_epoch_raiting = 1
@@ -247,7 +251,7 @@ if __name__ == '__main__':
     mem = []
     raitnig = [[],[]]
 
-    for epoch in range(1000):
+    for epoch in range(10000):
 
         # random.shuffle(sample['train'])
         
@@ -259,10 +263,12 @@ if __name__ == '__main__':
         for dot in sample['train']:
             if not (getAnswer(net.predict(dot[0])) == encode(dot[1],len(sample['class_names']))):
                 miss_number += 1
+                # print (dot)
         
         for dot in sample['check']:
             if not (getAnswer(net.predict(dot[0])) == encode(dot[1],len(sample['class_names']))):
                 miss_number += 1
+                # print (dot)
 
         current_raiting = miss_number/over_all
         mem.append(current_raiting)
@@ -270,8 +276,6 @@ if __name__ == '__main__':
         if current_raiting < best_epoch_raiting:
             best_epoch = epoch
             best_net = copy.deepcopy(net)
-
-        if epoch > 200: break
 
         if sample_name != 'iris.json':
             if epoch > 20:
@@ -285,6 +289,11 @@ if __name__ == '__main__':
         print ('epoch {}: {}'.format(epoch, current_raiting))
         raitnig[0].append(epoch)
         raitnig[1].append(current_raiting)
+
+        if current_raiting < 0.001: break
+
+        if epoch == 1000:
+            net.speed = 0.001
 
     # print (raitnig)
     plt.figure(0)
